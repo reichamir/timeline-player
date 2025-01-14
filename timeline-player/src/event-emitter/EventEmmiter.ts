@@ -1,4 +1,5 @@
-type EventCallback<T = any> = (payload: T) => void;
+// type EventCallback<T = any> = (payload: T) => void;
+type EventCallback<T> = (payload: T) => void;
 
 class EventEmitter<TEvents extends Record<string, any>> {
   private events: Map<keyof TEvents, Set<EventCallback<any>>>;
@@ -9,7 +10,7 @@ class EventEmitter<TEvents extends Record<string, any>> {
 
   on<K extends keyof TEvents>(
     event: K,
-    callback: EventCallback<TEvents[K]>
+    callback: (args: { payload: TEvents[K]; eventName: K }) => void
   ): void {
     if (!this.events.has(event)) {
       this.events.set(event, new Set());
@@ -20,7 +21,7 @@ class EventEmitter<TEvents extends Record<string, any>> {
 
   off<K extends keyof TEvents>(
     event: K,
-    callback: EventCallback<TEvents[K]>
+    callback: (args: { payload: TEvents[K]; eventName: K }) => void
   ): void {
     if (!this.events.has(event)) {
       return;
@@ -44,7 +45,7 @@ class EventEmitter<TEvents extends Record<string, any>> {
     }
 
     this.events.get(event)!.forEach((listener) => {
-      listener(args[0] as TEvents[K]);
+      listener({ payload: args[0] as TEvents[K], eventName: event });
     });
   }
 }

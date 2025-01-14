@@ -1,9 +1,9 @@
-import { Destroy } from "../types/destroy";
+import { Destroyable } from "../types/destroyable";
 
-export class Video implements Destroy {
+export class VideoManager implements Destroyable {
   public isLoading: boolean = false;
-  private onLoadingEvent: () => void;
-  private onLoadingCompleteEvent: () => void;
+  private onLoadingOutputEvent: () => void;
+  private onLoadingCompleteOutputEvent: () => void;
 
   constructor({
     url,
@@ -14,8 +14,8 @@ export class Video implements Destroy {
     onLoading: () => void;
     onLoadingComplete: () => void;
   }) {
-    this.onLoadingEvent = onLoading;
-    this.onLoadingCompleteEvent = onLoadingComplete;
+    this.onLoadingOutputEvent = onLoading;
+    this.onLoadingCompleteOutputEvent = onLoadingComplete;
 
     this.handleLoading();
 
@@ -27,13 +27,13 @@ export class Video implements Destroy {
   private handleLoading = () => {
     this.isLoading = true;
 
-    this.onLoadingEvent();
+    this.onLoadingOutputEvent();
   };
 
   private handleLoadingComplete = () => {
     this.isLoading = false;
 
-    this.onLoadingCompleteEvent();
+    this.onLoadingCompleteOutputEvent();
   };
 
   public destroy = () => {};

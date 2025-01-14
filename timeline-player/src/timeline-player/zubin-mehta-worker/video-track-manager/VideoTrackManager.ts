@@ -1,10 +1,10 @@
-import { Destroy } from "../types/destroy";
-import { Video } from "../Video/Video";
+import { Destroyable } from "../types/destroyable";
+import { VideoManager } from "../video-manager/VideoManager";
 
-export class VideoTrack implements Destroy {
-  private videos: Video[] = [];
-  private onLoadingEvent: () => void;
-  private onLoadingCompleteEvent: () => void;
+export class VideoTrackManager implements Destroyable {
+  private videos: VideoManager[] = [];
+  private onLoadingOutputEvent: () => void;
+  private onLoadingCompleteOutputEvent: () => void;
 
   constructor({
     onLoading,
@@ -13,13 +13,13 @@ export class VideoTrack implements Destroy {
     onLoading: () => void;
     onLoadingComplete: () => void;
   }) {
-    this.onLoadingEvent = onLoading;
-    this.onLoadingCompleteEvent = onLoadingComplete;
+    this.onLoadingOutputEvent = onLoading;
+    this.onLoadingCompleteOutputEvent = onLoadingComplete;
   }
 
   public addVideo = ({ url }: { url: string }) => {
     this.videos.push(
-      new Video({
+      new VideoManager({
         url,
         onLoading: this.handleLoadingVideo,
         onLoadingComplete: this.handleLoadingVideoComplete,
@@ -28,11 +28,11 @@ export class VideoTrack implements Destroy {
   };
 
   private handleLoadingVideo = () => {
-    this.onLoadingEvent();
+    this.onLoadingOutputEvent();
   };
 
   private handleLoadingVideoComplete = () => {
-    this.onLoadingCompleteEvent();
+    this.onLoadingCompleteOutputEvent();
   };
 
   public destroy = () => {

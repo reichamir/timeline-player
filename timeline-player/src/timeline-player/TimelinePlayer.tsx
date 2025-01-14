@@ -1,7 +1,6 @@
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { StudioContext } from "../context/StudioContext";
 import { studioEvents } from "../event-emitter/events";
-import { AddVideoPayload } from "../event-emitter/types/LibraryEventsType";
 import ZubinMehtaWorker from "./zubin-mehta-worker/zubinMehtaWorker?worker";
 import {
   incomingMessageTypes,
@@ -10,6 +9,7 @@ import {
 import { Message } from "./zubin-mehta-worker/types/message";
 import { IncomingMessages } from "./zubin-mehta-worker/types/incomingMessages";
 import { OutcomingMessages } from "./zubin-mehta-worker/types/outcomingMessages";
+import { StudioEventsType } from "../event-emitter/types/StudioEventsType";
 
 export function TimelinePlayer() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -52,11 +52,14 @@ export function TimelinePlayer() {
     zubinMehtaWorkerRef.current.postMessage(message, [offscreenCanvas]);
   }, [canvasRef, zubinMehtaWorkerRef]);
 
-  const onAddVideo = useCallback(
-    (payload: AddVideoPayload) => {
+  const forwardEventToZubinMehta = useCallback(
+    (args: {
+      payload: StudioEventsType[keyof StudioEventsType];
+      eventName: keyof StudioEventsType;
+    }) => {
       const message: Message<IncomingMessages> = {
-        type: incomingMessageTypes.timeline.library.addVideo,
-        payload,
+        type: args.eventName,
+        payload: args.payload,
       };
 
       zubinMehtaWorkerRef.current.postMessage(message);
@@ -65,12 +68,18 @@ export function TimelinePlayer() {
   );
 
   const addStudioEventsListeners = useCallback(() => {
-    eventEmitter.on(studioEvents.timeline.library.addVideo, onAddVideo);
-  }, [eventEmitter, onAddVideo]);
+    eventEmitter.on(
+      studioEvents.timeline.library.addVideo,
+      forwardEventToZubinMehta
+    );
+  }, [eventEmitter, forwardEventToZubinMehta]);
 
   const removeStudioEventsListeners = useCallback(() => {
-    eventEmitter.off(studioEvents.timeline.library.addVideo, onAddVideo);
-  }, [eventEmitter, onAddVideo]);
+    eventEmitter.off(
+      studioEvents.timeline.library.addVideo,
+      forwardEventToZubinMehta
+    );
+  }, [eventEmitter, forwardEventToZubinMehta]);
 
   const destroyZubinMehta = useCallback(() => {
     const message: Message<IncomingMessages> = {
